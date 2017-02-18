@@ -27,8 +27,8 @@ import org.apache.flink.client.program.ProgramInvocationException;
 public class Usage {
 
 	private static final Class[] EXAMPLES = new Class[]{
-		org.apache.flink.graph.social.SSSP.class,
-		org.apache.flink.graph.social.PageRankAlgo.class
+		org.apache.flink.graph.arango.SSSP.class,
+		org.apache.flink.graph.arango.PageRankAlgo.class
 	};
 
 	private static String getUsage() {

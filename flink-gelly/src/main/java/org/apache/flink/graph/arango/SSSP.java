@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.graph.social;
+package org.apache.flink.graph.arango;
 
 import org.apache.flink.api.common.ProgramDescription;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -133,21 +133,26 @@ public class SSSP implements ProgramDescription {
   private static String edgesInputPath = null;
   
   private static String outputPath = null;
-  
-  private static int maxIterations = 5;
+  private static String fieldDelimiter = " ";
+
+  private static int maxIterations = 50;
   
   private static boolean parseParameters(String[] args) {
       if(args.length != 4) {
-        System.err.println("Usage: PregelSSSP <source vertex id>" +
-                           " <input edges path> <output path> <num iterations>");
+        System.err.println("Usage: PregelSSSP" +
+                           " <input edges path> <output path> <delimiter> <source vertex id>");
         return false;
       }
       
       fileOutput = true;
-      srcVertexId = Long.parseLong(args[0]);
-      edgesInputPath = args[1];
-      outputPath = args[2];
-      maxIterations = Integer.parseInt(args[3]);
+      edgesInputPath = args[0];
+      outputPath = args[1];
+      if (args[2].equalsIgnoreCase("t")) {
+        fieldDelimiter = "\t";
+      }
+    
+      srcVertexId = Long.parseLong(args[3]);
+      
     return true;
   }
   /*
@@ -168,7 +173,7 @@ public class SSSP implements ProgramDescription {
     if (fileOutput) {
       return env.readCsvFile(edgesInputPath)
       .lineDelimiter("\n")
-      .fieldDelimiter(" ")
+      .fieldDelimiter(fieldDelimiter)
       .ignoreComments("%")
       .types(Long.class, Long.class);
     } else {

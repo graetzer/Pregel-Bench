@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.flink.graph.social;
+package org.apache.flink.graph.arango;
 
 import org.apache.flink.api.common.ProgramDescription;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.SingleInputUdfOperator;
@@ -29,12 +30,16 @@ import org.apache.flink.graph.Graph;
 import org.apache.flink.graph.Vertex;
 import org.apache.flink.graph.library.GSAPageRank;
 import org.apache.flink.graph.library.PageRank;
-import org.apache.flink.graph.pregel.ComputeFunction;
-import org.apache.flink.graph.pregel.MessageCombiner;
-import org.apache.flink.graph.pregel.MessageIterator;
-import org.apache.flink.types.NullValue;
 
 public class PageRankAlgo implements ProgramDescription {
+
+  static class TranformClass implements MapFunction<Tuple2<Long, Long>, Edge<Long, Double>> {
+
+    @Override
+    public Edge<Long, Double> map(Tuple2<Long, Long> input) throws Exception {
+      return new Edge<Long, Double>(input.f0, input.f1, 1.0);
+    }
+  }
   
   public static void main(String[] args) throws Exception {
     
@@ -47,27 +52,24 @@ public class PageRankAlgo implements ProgramDescription {
     //DataSet<Edge<Long, Double>> edges = getEdgesDataSet(env);
     //Graph<Long, Double, Double> graph = Graph.fromDataSet(edges, new InitVertices(), env);
     DataSet<Tuple2<Long, Long>> edges = getEdgesDataTupleSet(env);
-    DataSet<Edge<Long, Double>> edgeDataSet = edges.map((MapFunction<Tuple2<Long, Long>, Edge<Long, Double>>) input
-            -> new Edge<Long, Double>(input.f0, input.f1, 1.0))
+    if (edges == null) {
+      return;
+    }
+
+    DataSet<Edge<Long, Double>> edgeDataSet = edges.map(new TranformClass())
             .withForwardedFields("f0; f1");
-    Graph.fromDataSet(edgeDataSet, new InitVertices(), env);
     Graph<Long, Double, Double> graph = Graph.fromDataSet(edgeDataSet, new InitVertices(), env);
+    //Graph<Long, Double, NullValue> graph = Graph.fromTuple2DataSet(edges, new InitVertices(), env);
 
-
-    GSAPageRank<Long> pageRank = new GSAPageRank<Long>(0.85, 35);
+    PageRank<Long> pageRank = new PageRank<Long>(0.85, maxIterations);
+    //GSAPageRank<Long> pageRank = new GSAPageRank<Long>(0.85, maxIterations);
     DataSet<Vertex<Long, Double>> result = pageRank.run(graph);
-
-
-	 /* start = System.nanoTime();
-	  PageRank<Long> pageRank2 = new PageRank<Long>(0.85, 35);
-	  DataSet<Vertex<Long, Double>> result2 = pageRank2.run(graph);
-	  long runtimeSA = System.nanoTime() - start;*/
 
 	long start = System.nanoTime();
     // emit result
     if (fileOutput) {
 	    result.writeAsCsv(outputPath, "\n", ",");
-	    env.execute("Pregel Single Source Shortest Paths Example");
+	    env.execute("Pregel PageRank");
     } else {
 	    result.print();
     }
@@ -76,10 +78,6 @@ public class PageRankAlgo implements ProgramDescription {
 	  System.out.print(runtimeGSA / 1000000.0);
 	  System.out.println("s");
   }
-
-  // --------------------------------------------------------------------------------------------
-  //  Single Source Shortest Path UDFs
-  // --------------------------------------------------------------------------------------------
 
   @SuppressWarnings("serial")
   private static final class InitVertices implements MapFunction<Long, Double> {
@@ -96,26 +94,27 @@ public class PageRankAlgo implements ProgramDescription {
   private static String edgesInputPath = null;
   
   private static String outputPath = null;
+    private static String fieldDelimiter = " ";
+
+  
+  private static int maxIterations = 49;
   
   private static boolean parseParameters(String[] args) {
     
-    if(args.length > 0) {
-      if(args.length != 4) {
-        System.err.println("Usage: PregelSSSP <source vertex id>" +
-                           " <input edges path> <output path> <num iterations>");
-        return false;
-      }
+    if(args.length >= 3) {
       
       fileOutput = true;
       edgesInputPath = args[0];
       outputPath = args[1];
+      if ("t".equalsIgnoreCase(args[2])) {
+        fieldDelimiter = "\t";
+      }
+      if (args.length >= 4) {
+        maxIterations = Integer.parseInt(args[3]);
+      }
+      
     } else {
-      System.out.println("Executing Pregel Single Source Shortest Paths example "
-                         + "with default parameters and built-in default data.");
-      System.out.println("  Provide parameters to read input data from files.");
-      System.out.println("  See the documentation for the correct format of input files.");
-      System.out.println("Usage: PregelSSSP <source vertex id>" +
-                         " <input edges path> <output path> <num iterations>");
+      System.out.println("Usage: Usage: PageRank <input edges path> <output path> <delimiter> [<iterations>]");
     }
     return true;
   }
@@ -124,7 +123,7 @@ public class PageRankAlgo implements ProgramDescription {
     if (fileOutput) {
       return env.readCsvFile(edgesInputPath)
       .lineDelimiter("\n")
-      .fieldDelimiter("\t")
+      .fieldDelimiter(fieldDelimiter)
       .ignoreComments("%")
       .types(Long.class, Long.class);
     } else {
