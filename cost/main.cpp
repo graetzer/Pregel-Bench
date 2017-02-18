@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   
   for (int i = 0; i < 20; i++) {
     for (size_t x = 0; x < vCount; x++) {
-      b[x] = (0.85 * a[x] + 0.15 / vCount) / d[x];
+      b[x] = 0.85 * a[x] / d[x];
       a[x] = 0.15 / vCount;// 1f32 - alpha;
     }
     for (Edge const& e : edges) {
