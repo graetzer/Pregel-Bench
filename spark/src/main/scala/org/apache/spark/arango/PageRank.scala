@@ -15,22 +15,14 @@
  * limitations under the License.
  */
 
-// scalastyle:off println
-package org.apache.spark.examples.graphx
-
-// $example on$
+package org.apache.spark.arango
 import org.apache.spark.graphx.GraphLoader
-// $example off$
+import org.apache.spark.graphx.lib.PageRank
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.internal.Logging
 
-/**
- * A PageRank example on social network dataset
- * Run with
- * {{{
- * bin/run-example graphx.PageRankExample
- * }}}
- */
-object PageRankExample {
+
+object PageRankAlgo {
   def main(args: Array[String]): Unit = {
     // Creates a SparkSession.
     val spark = SparkSession
@@ -39,22 +31,27 @@ object PageRankExample {
       .getOrCreate()
     val sc = spark.sparkContext
 
+    if (args.length < 2) {
+      println("Submit at least <edge file path> <out path>")
+      return
+    }
+    val inFile = args(0) //sc.textFile(args(0)
+    val outFile = args(1) //sc.textFile()
+
     // $example on$
     // Load the edges as a graph
-    val graph = GraphLoader.edgeListFile(sc, "data/graphx/followers.txt")
+    val graph = GraphLoader.edgeListFile(sc, inFile, true)
+
+
     // Run PageRank
-    val ranks = graph.pageRank(0.0001).vertices
-    // Join the ranks with the usernames
-    val users = sc.textFile("data/graphx/users.txt").map { line =>
-      val fields = line.split(",")
-      (fields(0).toLong, fields(1))
-    }
-    val ranksByUsername = users.join(ranks).map {
-      case (id, (username, rank)) => (username, rank)
-    }
-    // Print the result
-    println(ranksByUsername.collect().mkString("\n"))
-    // $example off$
+    val outGraph = PageRank.run(graph, 20)
+    val pr = outGraph.vertices.cache()
+
+    println("Saving pageranks of pages to " + outFile)
+
+    pr.map { case (id, r) => id + "\t" + r }.saveAsTextFile(outFile)
+
+    sc.stop()
     spark.stop()
   }
 }

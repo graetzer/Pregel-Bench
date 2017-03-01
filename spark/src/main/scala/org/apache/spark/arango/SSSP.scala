@@ -15,24 +15,13 @@
  * limitations under the License.
  */
 
-// scalastyle:off println
-package org.apache.spark.examples.graphx
-
-// $example on$
+package org.apache.spark.arango
 import org.apache.spark.graphx.{Graph, VertexId, GraphLoader}
 import org.apache.spark.graphx.util.GraphGenerators
-// $example off$
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.internal.Logging
 
-/**
- * An example use the Pregel operator to express computation
- * such as single source shortest path
- * Run with
- * {{{
- * bin/run-example graphx.SSSPExample
- * }}}
- */
-object SSSPExample {
+object SSSP {
   def main(args: Array[String]): Unit = {
     // Creates a SparkSession.
     val spark = SparkSession
@@ -41,20 +30,16 @@ object SSSPExample {
       .getOrCreate()
     val sc = spark.sparkContext
 
-    if (args.length < 3 {
-      println("Submit at least <file path> <out path> <source vertex id>")
-      exit()
+    if (args.length < 3) {
+      println("Submit at least <edge file  path> <out path> <source vertex id>")
       return
     }
-    val inFile = sc.textFile(args[0])
-    val outFile = sc.textFile(args[1])
-    val sourceId : VertexId = args[1].toLong 
+    val inFile = args(0)
+    val outFile = args(1)
+    val sourceId : VertexId = args(2).toLong 
     // The ultimate source 58829577
 
-    // $example on$
     // A graph with edge attributes containing distances
-    //val graph: Graph[Long, Double] =
-    //  GraphGenerators.logNormalGraph(sc, numVertices = 100).mapEdges(e => e.attr.toDouble)
     val graph: Graph[Int, Int] = GraphLoader.edgeListFile(sc, inFile, true)
 
     // Initialize the graph such that all vertices except the root have distance infinity.
@@ -72,10 +57,11 @@ object SSSPExample {
       },
       (a, b) => math.min(a, b) // Merge Message
     )
-    //println(sssp.vertices.collect.mkString("\n"))
-    // $example off$
+
+    val pr = sssp.vertices.cache()
+    println("Saving pageranks of pages to " + outFile)
+    pr.map { case (id, r) => id + "\t" + r }.saveAsTextFile(outFile)
 
     spark.stop()
   }
 }
-// scalastyle:on println
