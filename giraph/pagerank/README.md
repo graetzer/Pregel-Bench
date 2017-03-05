@@ -1,33 +1,23 @@
-Build docker image (run in parent dir with Dockerfile):
+# hadoop2
 
-    cd giraph-pagerank
-    docker build -t giraph-docker .
+mkdir giraph && cd giraph && wget http://mirror.serversupportforum.de/apache/giraph/giraph-1.2.0/giraph-dist-1.2.0-hadoop2-bin.tar.gz
+tar -zxvf giraph-dist-1.2.0-hadoop2-bin.tar.gz && rm giraph-dist-1.2.0-hadoop2-bin.tar.gz
 
-Start the container:
+wget http://archive.apache.org/dist/hadoop/core/hadoop-2.5.1/hadoop-2.5.1.tar.gz
+tar -zxvf  hadoop-2.5.1.tar.gz && rm hadoop-2.5.1.tar.gz
 
-    docker run --volume $HOME:/myhome --rm --interactive --tty giraph-docker /etc/giraph-bootstrap.sh -bash
+export JAVA_HOME=/usr/lib/jvm/default-java
+export HADOOP_HOME=/graetzer/giraph/hadoop-2.5.1
+export HADOOP_PREFIX=/graetzer/giraph/hadoop-2.5.1
+export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
 
-The following commands should all be run inside the container.
-
-Compile our PageRank example:
-
-    cd $GIRAPH_HOME/pagerank
-    make
-
-Copy the sample input into HDFS:
-
-    $HADOOP_HOME/bin/hdfs dfs -put $GIRAPH_HOME/tiny-graph.txt /user/root/input/tiny-graph.txt
-
-Run the example:
-
-    $HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 1 --vertexInputFormat org.apache.giraph.io.formats.JsonLongDoubleFloatDoubleVertexInputFormat --vertexInputPath /user/root/input/tiny-graph.txt -vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat --outputPath /user/root/output
-
-Check the output:
-
-    $HADOOP_HOME/bin/hdfs dfs -cat /user/root/output/part-m-00001
-
-To run it again, make sure the `output` dir is removed first:
-
-    $HADOOP_HOME/bin/hdfs dfs -rm -r /user/root/output/
+wget https://github.com/apache/giraph/archive/rel/1.2.0-RC1.tar.gz
+tar -zxvf   1.2.0-RC1.tar.gz
+mvn package -DskipTests -Phadoop_2
 
 
+
+$HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 1 \
+--vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat --vertexInputPath /user/graetzer/input \
+--vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat --outputPath /user/graetzer/output \
+--combiner org.apache.giraph.combiner.DoubleSumCombiner -ca giraph.SplitMasterWorker=false
