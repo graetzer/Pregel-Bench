@@ -38,7 +38,7 @@ object SSSP {
     // Orkut: 1182118
 
     // A graph with edge attributes containing distances
-    val graph: Graph[Int, Int] = GraphLoader.edgeListFile(sc, inFile, true)
+    val graph: Graph[Int, Int] = GraphLoader.edgeListFile(sc, inFile)
 
     // Initialize the graph such that all vertices except the root have distance infinity.
     val initialGraph : Graph[Int, Int] = graph.mapVertices((id, _) =>

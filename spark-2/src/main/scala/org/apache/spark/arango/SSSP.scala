@@ -36,16 +36,19 @@ object SSSP {
     }
     val inFile = args(0)
     val outFile = args(1)
-    val sourceId : VertexId = args(2).toLong 
+    val sourceId : VertexId = args(2).toLong
+    printf("Using source ID " + sourceId)
     // The ultimate source 58829577
+    // Orkut: 1182118
 
     // A graph with edge attributes containing distances
-    val graph: Graph[Int, Int] = GraphLoader.edgeListFile(sc, inFile, true)
+    val graph: Graph[Int, Int] = GraphLoader.edgeListFile(sc, inFile)
 
     // Initialize the graph such that all vertices except the root have distance infinity.
-    val initialGraph : Graph[Int, Int] = graph.mapVertices((id, _) =>
-        if (id == sourceId) 0 else Int.MaxValue)
+    val initialGraph = graph.mapVertices((id, _) =>
+        if (id == sourceId) 0 else 2323123)
 
+    println("Loaded Graph from " + inFile)
     val sssp = initialGraph.pregel(Int.MaxValue)(
       (id, dist, newDist) => math.min(dist, newDist), // Vertex Program
       triplet => {  // Send Message

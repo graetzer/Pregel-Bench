@@ -41,7 +41,7 @@ object PageRankAlgo {
     // $example on$
     // Load the edges as a graph
     val graph = GraphLoader.edgeListFile(sc, inFile, true)
-
+    println("Loaded graph from " + inFile)
 
     // Run PageRank
     val outGraph = PageRank.run(graph, 20)
