@@ -18,6 +18,7 @@
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.giraph.combiner.MessageCombiner;
 
 /**
  * A combiner that sums double-valued messages
