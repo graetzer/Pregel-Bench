@@ -45,7 +45,7 @@ public class ShortestPath extends BasicComputation<
 
     if (minDist < vertex.getValue().get()) {
       vertex.setValue(new DoubleWritable(minDist));
-      for (Edge<LongWritable, FloatWritable> edge : vertex.getEdges()) {
+      for (Edge<LongWritable, NullWritable> edge : vertex.getEdges()) {
         double distance = minDist + edge.getValue().get();
         sendMessage(edge.getTargetVertexId(), new DoubleWritable(distance));
       }
