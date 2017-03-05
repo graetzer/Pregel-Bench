@@ -23,8 +23,7 @@ import org.apache.giraph.combiner.MessageCombiner;
 /**
  * A combiner that sums double-valued messages
  */
-public class DoubleSumCombiner extends
-    Combiner<LongWritable, DoubleWritable> {
+public class DoubleSumCombiner implements MessageCombiner<LongWritable, DoubleWritable> {
   @Override
   public void combine(LongWritable vertexIndex, DoubleWritable originalMessage,
       DoubleWritable messageToCombine) {
