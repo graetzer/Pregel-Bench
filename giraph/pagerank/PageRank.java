@@ -22,7 +22,7 @@ public class PageRank extends BasicComputation<
   public void compute(Vertex<LongWritable, DoubleWritable, NullWritable> vertex, 
       Iterable<DoubleWritable> messages) throws IOException {
     double value = 0;
-    if (getSuperstep == 0) {
+    if (getSuperstep() == 0) {
       value = 1.0 / getTotalNumVertices();
     } else {
       double sum = 0;
