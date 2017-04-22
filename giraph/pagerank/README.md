@@ -24,6 +24,11 @@ mvn package -DskipTests -Phadoop_2
 ```
 
 ```
+$HADOOP_HOME/bin/hdfs dfs -rmr /user/graetzer/input
+$HADOOP_HOME/bin/hdfs dfs -mkdir /user
+$HADOOP_HOME/bin/hdfs dfs -mkdir /user/graetzer
+$HADOOP_HOME/bin/hdfs dfs -put ~/testdata/orkut/edges-adj.txt /user/graetzer/input
+
 $HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 1 \
 --vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat --vertexInputPath /user/graetzer/input \
 --vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat --outputPath /user/graetzer/output \
