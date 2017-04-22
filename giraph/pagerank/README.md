@@ -32,5 +32,5 @@ $HADOOP_HOME/bin/hdfs dfs -put ~/testdata/orkut/edges-adj.txt /user/graetzer/inp
 $HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 1 \
 --vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat --vertexInputPath /user/graetzer/input \
 --vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat --outputPath /user/graetzer/output \
---combiner org.apache.giraph.combiner.DoubleSumCombiner -ca giraph.SplitMasterWorker=false
+--combiner DoubleSumCombiner -ca giraph.SplitMasterWorker=false
 ```
