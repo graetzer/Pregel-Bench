@@ -24,10 +24,12 @@ export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
 export GIRAPH_HOME=/graetzer/giraph-1.2/
 ```
 
-Now you can run `make all` to compile the pagerank code
+Now you can run `make all` to compile the pagerank code. This will bundle your
+code together with the giraph JAR with **all** dependencies. This jar can then be deployed to a 
+yarn cluster as it is.
 
 
-Deploy programm
+Deploy program to yarn cluster:
 ```
 $HADOOP_HOME/bin/hdfs dfs -rmr /user/graetzer/input
 $HADOOP_HOME/bin/hdfs dfs -mkdir /user
