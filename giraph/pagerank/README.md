@@ -15,7 +15,7 @@ tar -zxvf   1.2.0-RC1.tar.gz
 mvn package -DskipTests -Phadoop_2
 ```
 
-Set enviorment variables for example
+Set enviroment variables for example
 ```
 export JAVA_HOME=/usr/lib/jvm/default-java
 export HADOOP_HOME=/graetzer/hadoop-2.5.1
@@ -23,6 +23,9 @@ export HADOOP_PREFIX=/graetzer/hadoop-2.5.1
 export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
 export GIRAPH_HOME=/graetzer/giraph-1.2/
 ```
+
+Now you can run `make all` to compile the pagerank code
+
 
 Deploy programm
 ```
