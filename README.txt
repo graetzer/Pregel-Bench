@@ -83,23 +83,24 @@ export HADOOP_PREFIX=/root/giraph/hadoop-2.5.1
 export HADOOP_CONF_DIR=/root/giraph/hadoop-2.5.1/etc/hadoop
 export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
 
-# Editiere /etc/hosts mit allen Hostnamen
+# Edit /etc/hosts with all Hostnames, otherwise hadoop will mess up
 # z.B.
 159.203.115.196 master-1
 138.197.70.0 test-01
 159.203.115.196 test-02
 
-Benutze das für core-site.xml und yarn-site.xml
-fs.defaultFS  / yarn.resourcemanager.hostname
+Remember to set these options in `core-site.xml` and `yarn-site.xml`
+`fs.defaultFS`  / `yarn.resourcemanager.hostname`
 
-## auf allen Rechnern formartiere HDFS dateisystem
+## Format HDFS filesystem on all nodes
 $HADOOP_PREFIX/bin/hdfs namenode -format pregel
 
-# Starte HDFS und yarn
+# Start HDFS and yarn
 $HADOOP_PREFIX/sbin/start-dfs.sh
 $HADOOP_PREFIX/sbin/start-yarn.sh
 
-## Giraph mit hadoop ausführen, beispiele:
+## Execute Giraph on hadoop, examples:
+The parameters `-ca mapred.job.map.memory.mb=14848 -ca mapred.job.reduce.memory.mb=14848` are sometimes required to get it running
 
 nohup $HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 1 \
 --vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat --vertexInputPath /user/graetzer/input \
