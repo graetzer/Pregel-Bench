@@ -8,18 +8,20 @@ wget http://archive.apache.org/dist/hadoop/core/hadoop-2.5.1/hadoop-2.5.1.tar.gz
 tar -zxvf  hadoop-2.5.1.tar.gz && rm hadoop-2.5.1.tar.gz
 ```
 
-```
-export JAVA_HOME=/usr/lib/jvm/default-java
-export HADOOP_HOME=/graetzer/giraph/hadoop-2.5.1
-export HADOOP_PREFIX=/graetzer/giraph/hadoop-2.5.1
-export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
-```
-
 Download and compile giraph
 ```
 wget https://github.com/apache/giraph/archive/rel/1.2.0-RC1.tar.gz
 tar -zxvf   1.2.0-RC1.tar.gz
 mvn package -DskipTests -Phadoop_2
+```
+
+Set enviorment variables for example
+```
+export JAVA_HOME=/usr/lib/jvm/default-java
+export HADOOP_HOME=/graetzer/hadoop-2.5.1
+export HADOOP_PREFIX=/graetzer/hadoop-2.5.1
+export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
+export GIRAPH_HOME=/graetzer/giraph-1.2/
 ```
 
 Deploy programm
