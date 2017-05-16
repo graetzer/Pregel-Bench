@@ -1,10 +1,10 @@
+apt-get update
 apt-get install cmake python libssl-dev
 
 git clone https://github.com/graetzer/arangodb.git 
 cd arangodb && git submodule update --init --recursive
 mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release  && make -j32
 
-apt-get update
 wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz
 tar -zxvf go1.7.1.linux-amd64.tar.gz -C /usr/local/
 export PATH=$PATH:/usr/local/go/bin
