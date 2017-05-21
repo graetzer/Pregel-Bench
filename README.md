@@ -69,63 +69,74 @@ export SPARK_LOCAL_IP=
 # mkdir giraph && cd giraph && wget http://mirror.serversupportforum.de/apache/giraph/giraph-1.2.0/giraph-dist-1.2.0-hadoop2-bin.tar.gz
 # tar -zxvf giraph-dist-1.2.0-hadoop2-bin.tar.gz && rm giraph-dist-1.2.0-hadoop2-bin.tar.gz
 
+```
 mkdir giraph && cd giraph && wget http://archive.apache.org/dist/hadoop/core/hadoop-2.5.1/hadoop-2.5.1.tar.gz
 tar -zxvf  hadoop-2.5.1.tar.gz && rm hadoop-2.5.1.tar.gz
+```
 
+```
 export JAVA_HOME=/usr/lib/jvm/default-java
 export HADOOP_HOME=/graetzer/giraph/hadoop-2.5.1
 export HADOOP_PREFIX=/graetzer/giraph/hadoop-2.5.1
 export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
+```
 
 # For DigitalOcean
+```
 export JAVA_HOME=/usr/lib/jvm/default-java
 export HADOOP_HOME=/root/giraph/hadoop-2.5.1
 export HADOOP_PREFIX=/root/giraph/hadoop-2.5.1
 export HADOOP_CONF_DIR=/root/giraph/hadoop-2.5.1/etc/hadoop
 export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
+```
 
 # Editiere /etc/hosts mit allen Hostnamen
 # z.B.
+```
 159.203.115.196 master-1
 138.197.70.0 test-01
 159.203.115.196 test-02
+```
 
 Benutze das für core-site.xml und yarn-site.xml
-fs.defaultFS  / yarn.resourcemanager.hostname
+`fs.defaultFS  / yarn.resourcemanager.hostname`
 
 # auf allen Rechnern
-$HADOOP_PREFIX/bin/hdfs namenode -format pregel
+`$HADOOP_PREFIX/bin/hdfs namenode -format pregel`
 
-
+```
 nohup $HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 1 \
 --vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat --vertexInputPath /user/graetzer/input \
 --vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat --outputPath /user/graetzer/output \
 --combiner DoubleSumCombiner -ca giraph.SplitMasterWorker=false &
+```
 
-
+```
 nohup $HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner ShortestPath --yarnjars myjar.jar --workers 1 \
 --vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat --vertexInputPath /user/graetzer/input \
 --vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat --outputPath /user/graetzer/output \
 --combiner DoubleMinCombiner -ca giraph.SplitMasterWorker=false -ca SimpleShortestPathsVertex.sourceId=58829577 &
+```
 
-$HADOOP_HOME/bin/hdfs dfs -put edges-adj.txt /user/root/input
+`$HADOOP_HOME/bin/hdfs dfs -put edges-adj.txt /user/root/input`
 
 
-
+```
 $HADOOP_HOME/bin/hadoop jar /root/giraph/pagerank/myjar.jar org.apache.giraph.GiraphRunner PageRank \
 --yarnjars /root/giraph/pagerank/myjar.jar --workers 2 --vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat \
 --vertexInputPath /user/root/input --vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat \
 --outputPath /user/root/output --combiner DoubleSumCombiner -ca mapred.job.tracker=45.55.50.229 \
 -ca mapred.job.map.memory.mb=14848 -ca mapred.job.reduce.memory.mb=14848
+```
 
 
-
+```
 $HADOOP_HOME/bin/hadoop jar /root/giraph/shortestpath/myjar.jar org.apache.giraph.GiraphRunner ShortestPath \
 --yarnjars /root/giraph/shortestpath/myjar.jar --workers 2 --vertexInputFormat org.apache.giraph.examples.LongDoubleNullTextInputFormat \
 --vertexInputPath /user/root/input --vertexOutputFormat org.apache.giraph.io.formats.IdWithValueTextOutputFormat \
 --outputPath /user/root/output --combiner DoubleMinCombiner -ca mapred.job.tracker=45.55.50.229 \
 -ca mapred.job.map.memory.mb=14848 -ca mapred.job.reduce.memory.mb=14848 -ca SimpleShortestPathsVertex.sourceId=1182118
-
+```
 
 
 #$HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 2 \
@@ -134,3 +145,11 @@ $HADOOP_HOME/bin/hadoop jar /root/giraph/shortestpath/myjar.jar org.apache.girap
 #--combiner DoubleSumCombiner -ca mapreduce.jobtracker.address=159.203.115.196:8021 \
 #-ca mapreduce.framework.name=yarn -ca mapreduce.map.cpu.vcores=7 -ca mapreduce.reduce.cpu.vcores=7 \
 #-ca yarn.app.mapreduce.am.resource.cpu-vcores=7
+
+
+
+# Community Detection
+
+To compute metrics download `https://github.com/Rofti/DMID` and compile files in the /Metrics/ folder
+
+javac -cp src/:lib/jgrapht-core-0.9.0.jar:lib/java-json.jar:lib/commons-math3-3.5.jar:lib/la4j-0.5.5.jar src/ocd/metrics/Main.java
