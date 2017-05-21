@@ -1,10 +1,10 @@
+apt-get update
 apt-get install cmake python libssl-dev
 
 git clone https://github.com/graetzer/arangodb.git 
 cd arangodb && git submodule update --init --recursive
 mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release  && make -j32
 
-apt-get update
 wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz
 tar -zxvf go1.7.1.linux-amd64.tar.gz -C /usr/local/
 export PATH=$PATH:/usr/local/go/bin
@@ -19,19 +19,19 @@ cat edges.csv | awk -F" " '{print "orkut_v/" $1 "\torkut_v/" $2 "\t" $1}' >> ara
 /root/arangodb/build/bin/arangoimp --file vertices.csv --type csv --collection orkut_v --overwrite true --convert false --server.endpoint http+tcp://127.0.0.1:4002  -c none
 /root/arangodb/build/bin/arangoimp --file arango-edges.csv --type csv --collection orkut_e --overwrite true --convert false --separator "\t" --server.endpoint http+tcp://127.0.0.1:4002  -c none
 
+## download start helper
+git clone https://github.com/arangodb-helper/arangodb.git && cd arangodb && make local
 
-git clone https://github.com/arangodb-helper/ArangoDBStarter.git && cd ArangoDBStarter && make local
-
-# First server
+## Start arangod on First server
 ./arangodb --arangod=/root/arangodb/build/bin/arangod --jsDir=/root/arangodb/js/
 ./arangodb --arangod=/graetzer/arangodb/build/bin/arangod --jsDir=/graetzer/arangodb/js/ --dataDir=./db/
 
-# Second & Third
+## Start Second & Third server
 ./arangodb --arangod=/root/arangodb/build/bin/arangod --jsDir=/root/arangodb/js/ --join 10.132.78.134
 ./arangodb --arangod=/graetzer/arangodb/build/bin/arangod --jsDir=/graetzer/arangodb/js/ --dataDir=./db/ --join 192.168.10.7
 
 
-# Java
+# Java prerequisites
 apt-get install default-jre
 
 
@@ -39,9 +39,8 @@ apt-get install default-jre
 wget http://artfiles.org/apache.org/flink/flink-1.2.0/flink-1.2.0-bin-hadoop27-scala_2.11.tgz
 tar -zxvf flink-1.2.0-bin-hadoop27-scala_2.11.tgz
 
-# flink/conf/slaves
-10.132.81.151
-10.132.91.87
+## Add your slaves to "flink/conf/slaves", for example 
+echo -e  "10.132.81.151\n10.132.91.87" >> flink/conf/slaves
 
 
 # Spark
@@ -49,11 +48,11 @@ wget http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
 tar -zxvf spark-2.1.0-bin-hadoop2.7.tgz
 mv spark-2.1.0-bin-hadoop2.7 spark && cd spark
 
-# master
+## on master, adjust local IP accordingly
 export SPARK_LOCAL_IP=192.168.10.5
 ./sbin/start-master.sh --host 192.168.10.5
 
-#workers & master
+## on workers & master
 export SPARK_LOCAL_IP=
 ./sbin/start-slave.sh  spark://192.168.10.5:7077
 
@@ -90,7 +89,7 @@ export HADOOP_CONF_DIR=/root/giraph/hadoop-2.5.1/etc/hadoop
 export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
 ```
 
-# Editiere /etc/hosts mit allen Hostnamen
+# Edit /etc/hosts with all Hostnames, otherwise hadoop will mess up
 # z.B.
 ```
 159.203.115.196 master-1
@@ -98,11 +97,18 @@ export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true
 159.203.115.196 test-02
 ```
 
-Benutze das für core-site.xml und yarn-site.xml
-`fs.defaultFS  / yarn.resourcemanager.hostname`
+Remember to set these options in `core-site.xml` and `yarn-site.xml`
+`fs.defaultFS`  / `yarn.resourcemanager.hostname`
 
-# auf allen Rechnern
-`$HADOOP_PREFIX/bin/hdfs namenode -format pregel`
+## Format HDFS filesystem on all nodes
+$HADOOP_PREFIX/bin/hdfs namenode -format pregel
+
+# Start HDFS and yarn
+$HADOOP_PREFIX/sbin/start-dfs.sh
+$HADOOP_PREFIX/sbin/start-yarn.sh
+
+## Execute Giraph on hadoop, examples:
+The parameters `-ca mapred.job.map.memory.mb=14848 -ca mapred.job.reduce.memory.mb=14848` are sometimes required to get it running
 
 ```
 nohup $HADOOP_HOME/bin/hadoop jar myjar.jar org.apache.giraph.GiraphRunner PageRank --yarnjars myjar.jar --workers 1 \
